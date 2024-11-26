@@ -1,0 +1,10 @@
+{
+    "Passport" : {
+        "name" : "2024 Passport Power",
+        "url" : "https://www.kaggle.com/datasets/bhadramohit/visa-free-countries-dataset2024"
+    },
+    "Acoustic fire" : {
+        "name" : "Acoustic Extinguisher Fire",
+        "url" : "https://www.kaggle.com/datasets/muratkokludataset/acoustic-extinguisher-fire-dataset"
+    }
+}
