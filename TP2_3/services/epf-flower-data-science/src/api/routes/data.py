@@ -14,7 +14,7 @@ project_root = os.path.abspath(os.path.join(script_dir, "../../../"))
 CONFIG_DATASET_PATH = os.path.join(project_root, "src/config/model_parameters.json")
 
 
-@router.get(path_get + "/{dataset_request}", name="Get dataset", response_model=MessageResponse)
+@router.get(path_get + "/{dataset_name}", name="Get dataset", response_model=MessageResponse)
 
 def get_dataset(dataset_request: str) -> MessageResponse:
     """
