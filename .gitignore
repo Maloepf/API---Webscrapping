@@ -1,2 +1,5 @@
-# Ignore all __pycache__ directories
-__pycache__/
+#Ignore all __pycache__ directories
+*.pyc
+
+#Ignore personal kaggle token
+kaggle_personal_token.json
