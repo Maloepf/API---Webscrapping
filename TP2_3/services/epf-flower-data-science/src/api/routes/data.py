@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
-from src.schemas.message import MessageResponse
+from src.schemas.message import MessageResponse, DataRetrival
 from src.schemas.patch import DatasetUpdate
 from src.schemas.post import PostDataset
 import json
 import os
+import opendatasets as od
 
 router = APIRouter()
 
@@ -65,6 +66,68 @@ def _get_all_datasets_info() -> MessageResponse:
 
     # Return the dataset names
     return MessageResponse(message="All datasets", data=dataset)
+
+@router.get(endpoint_all_datasets + "/{dataset_name}", name="Get data from dataset", response_model=DataRetrival)
+def _get_data(dataset_name: str) -> DataRetrival:
+    """
+    Download the data from the dataset based on the dataset name.
+    
+    Args:
+        dataset_name (str): The name of the dataset to be retrieved.
+    
+    Raises:
+        HTTPException: If there are issues accessing the dataset or configuration file.
+    
+    Returns:
+        DataRetrival: A message with the dataset info and the data URL.
+    """
+    try:
+        # Load the JSON config file
+        with open(CONFIG_DATASET_PATH, 'r') as f:
+            dataset = json.load(f)
+    
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Dataset configuration file not found."
+        )
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error decoding the dataset configuration file."
+        )
+    
+    # Check if the dataset_name exists in the loaded dataset
+    if dataset_name not in dataset:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Dataset '{dataset_name}' not found in the configuration. You can add it using /dataset/add/{{dataset_name}}."
+        )
+
+    # Retrieve the dataset details
+    dataset_details = dataset[dataset_name]
+
+    # Downloading the data (assuming you want to download from the URL)
+    try:
+        url = dataset_details["url"]
+        od.download(url)
+
+        # For now, we're just assuming the download process happens here
+        data = f"Data from {url} downloaded successfully."  # Placeholder for actual data retrieval logic
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error downloading the dataset: {str(e)}"
+        )
+
+    # Return the response with dataset details and download status
+    return DataRetrival(
+        dataset_name=dataset_name,
+        url=dataset_details["url"],
+        data=data  # Or the actual data fetched from the URL, if you have it
+    )
+
 
 @router.patch(path_patch + "/{dataset_name}", name="Edit dataset", response_model=MessageResponse)
 def patch_dataset(dataset_name: str, update_data: DatasetUpdate) -> MessageResponse:
